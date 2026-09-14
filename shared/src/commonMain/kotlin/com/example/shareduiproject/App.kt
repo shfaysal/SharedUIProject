@@ -18,19 +18,28 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import com.example.shareduiproject.viewModel.LocationUiState
+import com.example.shareduiproject.viewModel.LocationViewModel
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.koinInject
 
 import shareduiproject.shared.generated.resources.Res
 import shareduiproject.shared.generated.resources.compose_multiplatform
 import kotlin.time.Clock
 
 @Composable
-@Preview
-fun App() {
+fun App(
+    onPermissionRequest: () -> Unit = {},
+    viewModel: LocationViewModel = koinInject()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(
@@ -57,6 +66,41 @@ fun App() {
                 ) {
                     Image(painterResource(Res.drawable.compose_multiplatform), null)
                     Text("Compose: $greeting")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = {
+                onPermissionRequest()
+                viewModel.fetchLocation()
+            }) {
+                Text("Get Location")
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            when (val state = uiState) {
+                is LocationUiState.Idle -> {
+                    Text("Location not fetched yet")
+                }
+                is LocationUiState.Loading -> {
+                    Text("Fetching location...")
+                }
+                is LocationUiState.Success -> {
+                    Text(
+                        text = "Lat: ${state.coordinates.latitude}, Lon: ${state.coordinates.longitude}",
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                is LocationUiState.Error -> {
+                    Text(
+                        text = "Error: ${state.message}",
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
             }
         }
