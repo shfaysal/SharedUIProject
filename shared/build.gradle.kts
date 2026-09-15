@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.koin.android)
             implementation(libs.play.services.location)
+            implementation(libs.androidx.core.ktx)
         }
 
         iosMain.dependencies{

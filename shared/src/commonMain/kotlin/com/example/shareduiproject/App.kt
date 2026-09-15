@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -71,12 +72,50 @@ fun App(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = {
-                onPermissionRequest()
-                viewModel.fetchLocation()
-            }) {
-                Text("Get Location")
+            val isTracking by viewModel.isTracking.collectAsState()
+
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    onClick = {
+                        onPermissionRequest()
+                        viewModel.fetchLocation()
+                    }
+                ) {
+                    Text("Get Once")
+                }
+
+                if (!isTracking) {
+                    Button(
+                        onClick = {
+                            onPermissionRequest()
+                            viewModel.startBackgroundTracking()
+                        }
+                    ) {
+                        Text("Start Background")
+                    }
+                } else {
+                    androidx.compose.material3.Button(
+                        onClick = { viewModel.stopBackgroundTracking() },
+                        colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("Stop Background")
+                    }
+                }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = if (isTracking) "Status: 🟢 Background Tracking Active" else "Status: ⚪ Background Tracking Inactive",
+                fontSize = 14.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -91,6 +130,7 @@ fun App(
                     Text(
                         text = "Lat: ${state.coordinates.latitude}, Lon: ${state.coordinates.longitude}",
                         fontSize = 16.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
                         textAlign = TextAlign.Center
                     )
                 }

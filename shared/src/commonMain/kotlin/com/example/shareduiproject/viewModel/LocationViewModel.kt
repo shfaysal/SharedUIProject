@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-
 sealed interface LocationUiState {
     data object Idle : LocationUiState
     data object Loading : LocationUiState
@@ -25,6 +24,16 @@ class LocationViewModel(
 ) {
     private val _uiState = MutableStateFlow<LocationUiState>(LocationUiState.Idle)
     val uiState: StateFlow<LocationUiState> = _uiState.asStateFlow()
+
+    val isTracking: StateFlow<Boolean> = locationService.isTracking
+
+    init {
+        coroutineScope.launch {
+            locationService.observeLocationUpdates(5000).collect { coords ->
+                _uiState.value = LocationUiState.Success(coords)
+            }
+        }
+    }
 
     fun fetchLocation() {
         _uiState.value = LocationUiState.Loading
@@ -40,6 +49,14 @@ class LocationViewModel(
                 _uiState.value = LocationUiState.Error(e.message ?: "An unexpected error occurred.")
             }
         }
+    }
+
+    fun startBackgroundTracking() {
+        locationService.startBackgroundTracking()
+    }
+
+    fun stopBackgroundTracking() {
+        locationService.stopBackgroundTracking()
     }
 
     // Call from iOS when the view disappears to avoid leaking coroutines

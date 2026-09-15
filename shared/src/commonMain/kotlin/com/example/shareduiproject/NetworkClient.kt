@@ -6,6 +6,6 @@ import io.ktor.client.engine.HttpClientEngine
 
 expect fun getHttpEngine() : HttpClientEngine
 
-fun createHttpClient() : HttpClient {
-    return HttpClient(getHttpEngine())
+fun createHttpClient(engine: HttpClientEngine = getHttpEngine()) : HttpClient {
+    return HttpClient(engine)
 }
