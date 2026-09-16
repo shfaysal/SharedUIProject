@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import com.example.shareduiproject.viewModel.LocationUiState
 import com.example.shareduiproject.viewModel.LocationViewModel
+import com.example.shareduiproject.viewModels.ProductViewModel
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -37,9 +38,15 @@ import kotlin.time.Clock
 @Composable
 fun App(
     onPermissionRequest: () -> Unit = {},
-    viewModel: LocationViewModel = koinInject()
+    viewModel: LocationViewModel = koinInject(),
+    productViewModel : ProductViewModel = koinInject()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val productState by productViewModel.uiState.collectAsState()
+
+    LaunchedEffect(productState){
+
+    }
 
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
